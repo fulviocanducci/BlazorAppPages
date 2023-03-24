@@ -1,6 +1,4 @@
 using BlazorApp1.Data;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlazorApp1
@@ -9,7 +7,7 @@ namespace BlazorApp1
    {
       public static void Main(string[] args)
       {
-         var builder = WebApplication.CreateBuilder(args);         
+         var builder = WebApplication.CreateBuilder(args);
          builder.Services.AddSingleton<WeatherForecastService>();
          builder.Services.AddDbContext<DatabaseContext>(configuration =>
          {
