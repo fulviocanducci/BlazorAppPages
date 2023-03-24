@@ -1,0 +1,89 @@
+﻿@page "/cars/{PageNumber:int?}"
+@using BlazorApp1.Data
+@using Canducci.Pagination
+@inject NavigationManager NavManager
+@inject DatabaseContext Database;
+
+<PageTitle>Counter</PageTitle>
+<h1>Carros</h1>
+
+@if (Model == null)
+{
+   <div>Carregando ...</div>
+}
+else if (Model != null && Model.Count == 0)
+{
+   <div>Nenhum item encontrado ...</div>
+}
+else
+{
+   <div>Pagina: @PageNumber</div>
+   <table class="table table-bordered table-sm">
+      <thead>
+         <tr>
+            <th scope="col" class="text-center">Id</th>
+            <th scope="col" class="text-center">Nome</th>
+            <th scope="col" class="text-center">...</th>
+         </tr>
+      </thead>
+      <tbody>
+         @if (Model != null)
+         {
+            @foreach (var item in Model)
+            {
+               <tr>
+                  <td style="width: 10%">@item?.Id</td>
+                  <td style="width: 80%">@item?.Name</td>
+                  <td style="width: 10%">...</td>
+               </tr>
+            }
+         }
+      </tbody>
+   </table>
+   <div>
+      @if (Model != null && Model.HasPreviousPage)
+      {
+         <button @onclick="GoBack" class="btn btn-primary btn-sm mr-2">Voltar</button>
+      }
+      @if (Model != null && Model.HasNextPage)
+      {
+         <button @onclick="GoAdvance" class="btn btn-primary btn-sm mr-2">Avançar</button>
+      }
+   </div>
+}
+@code {
+
+   private Paginated<Car>? Model { get; set; } = null;
+
+   [Parameter()]
+   public int? PageNumber { get; set; } = 1;
+
+   private void GoBack()
+   {
+      if (Model != null && Model.HasPreviousPage)
+      {
+         PageNumber--;
+         if (PageNumber <= 0)
+         {
+            PageNumber = 1;
+         }
+         NavManager.NavigateTo($"cars/{PageNumber}");
+      }
+   }
+
+   private void GoAdvance()
+   {
+      PageNumber++;
+      if (PageNumber > Model?.PageCount)
+      {
+         PageNumber = Model.PageCount;
+      }
+      NavManager.NavigateTo($"cars/{PageNumber}");
+   }
+
+   protected override async Task OnParametersSetAsync()
+   {
+      if (PageNumber == null) PageNumber = 1;
+      Model = await Database.Car.OrderBy(c => c.Id).ToPaginatedAsync(PageNumber.Value, 1);
+   }
+}
